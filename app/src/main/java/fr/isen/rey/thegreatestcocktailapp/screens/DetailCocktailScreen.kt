@@ -1,4 +1,4 @@
-package fr.isen.rey.thegreatestcocktailapp
+package fr.isen.rey.thegreatestcocktailapp.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -27,6 +27,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import fr.isen.rey.thegreatestcocktailapp.R
 
 data class Ingredient(val ingredient: String, val measure: String)
 
