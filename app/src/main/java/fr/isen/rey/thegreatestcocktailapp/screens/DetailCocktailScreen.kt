@@ -1,5 +1,6 @@
 package fr.isen.rey.thegreatestcocktailapp.screens
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -18,6 +19,9 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -25,9 +29,17 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
 import fr.isen.rey.thegreatestcocktailapp.R
+import fr.isen.rey.thegreatestcocktailapp.network.DrinkModel
+import fr.isen.rey.thegreatestcocktailapp.network.Drinks
+import fr.isen.rey.thegreatestcocktailapp.network.NetworkManager
+import retrofit2.Callback
+import retrofit2.Call
+import retrofit2.Response
 
 data class Ingredient(val ingredient: String, val measure: String)
 
@@ -39,22 +51,46 @@ fun DetailCocktailScreen(modifier: Modifier) {
         Ingredient("lime juice", "2cl")
     )
 
+    val drink = remember { mutableStateOf(DrinkModel()) }
+
+    LaunchedEffect(Unit) {
+        val call = NetworkManager.api.getRandomCocktail()
+        call.enqueue(object : Callback<Drinks> {
+            override fun onResponse(p0: Call<Drinks?>,p1: Response<Drinks?>) {
+                drink.value = p1.body()?.drinks?.first() ?: DrinkModel()
+            }
+
+            override fun onFailure(p0: Call<Drinks?>, p1: Throwable) {
+                Log.e("error", p1.message.toString())
+            }
+        })
+    }
+
     Column(modifier
         .fillMaxSize()
         .background(brush = Brush.linearGradient(listOf(Color.Cyan, Color.Black)))
         .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        Image(
-            painterResource(R.drawable.cocktail),
-            contentDescription = "photo cocktail",
+        AsyncImage(
+            drink.value.imageURL,
+            contentDescription = drink.value.name,
             modifier = Modifier
                 .size(200.dp)
                 .clip(CircleShape),
             contentScale = ContentScale.Crop
-            )
+        )
 
-        Text("Blue Lagoon",
+//        Image(
+//            painterResource(R.drawable.cocktail),
+//            contentDescription = "photo cocktail",
+//            modifier = Modifier
+//                .size(200.dp)
+//                .clip(CircleShape),
+//            contentScale = ContentScale.Crop
+//            )
+
+        Text(drink.value.name,
             color = Color.White,
             fontSize = 30.sp)
 
@@ -65,7 +101,7 @@ fun DetailCocktailScreen(modifier: Modifier) {
                     shape = RoundedCornerShape(20.dp)
                 )
             ) {
-                Text("category",
+                Text(drink.value.category,
                     Modifier.padding(4.dp)
                 )
             }
@@ -83,7 +119,8 @@ fun DetailCocktailScreen(modifier: Modifier) {
                 Color.Unspecified,
                 Color.Unspecified)) {
             Column(Modifier.padding(16.dp)) {
-                Text("Ingredients",
+                Text(
+                    stringResource(R.string.detail_ingredients_title),
                     color = Color.White,
                     fontSize = 25.sp)
 

@@ -9,5 +9,7 @@ class Drinks(
 
 class DrinkModel(
     @SerializedName("idDrink") val id: String = "",
-    @SerializedName("strDrink") val name: String = ""
+    @SerializedName("strDrink") val name: String = "",
+    @SerializedName("strCategory") val category: String = "",
+    @SerializedName("strDrinkThumb") val imageURL: String = ""
 ): Serializable
