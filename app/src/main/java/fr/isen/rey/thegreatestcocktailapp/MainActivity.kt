@@ -27,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -36,13 +37,13 @@ import fr.isen.rey.thegreatestcocktailapp.ui.theme.TheGreatestCocktailAppTheme
 import kotlinx.coroutines.launch
 
 enum class NavigationItem(
-    val title: String,
+    val titleID: Int,
     val icon: ImageVector,
     val route: String
 ) {
-    Home("A la une", Icons.Default.Home, "home"),
-    List("Catégories", Icons.Default.Menu, "list"),
-    Fav("Favoris", Icons.Default.Favorite, "fav")
+    Home(R.string.nav_title_random, Icons.Default.Home, "home"),
+    List(R.string.nav_title_category, Icons.Default.Menu, "list"),
+    Fav(R.string.nav_title_fav, Icons.Default.Favorite, "fav")
 }
 
 class MainActivity : ComponentActivity() {
@@ -73,7 +74,7 @@ class MainActivity : ComponentActivity() {
                                         currentNavigationItem.value = navigationItem
                                     },
                                     label = {
-                                        Text(navigationItem.title)
+                                        Text(stringResource(navigationItem.titleID))
                                     },
                                     icon = {
                                         Icon(navigationItem.icon, contentDescription = "")
@@ -111,8 +112,8 @@ fun TopAppBar(snackbarHostState: SnackbarHostState) {
             Text("Random")
         },
         actions = {
-            val added = "Ajouté aux favoris"
-            val removed = "Retiré des favoris"
+            val added = stringResource(R.string.snackbar_added)
+            val removed = stringResource(R.string.snackbar_removed)
 //            val context = LocalContext.current
 
             val snackbarScope = rememberCoroutineScope()
