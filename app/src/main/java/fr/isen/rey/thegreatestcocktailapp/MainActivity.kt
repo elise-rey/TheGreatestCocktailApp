@@ -27,12 +27,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import fr.isen.rey.thegreatestcocktailapp.screens.CategoriesScreen
 import fr.isen.rey.thegreatestcocktailapp.screens.DetailCocktailScreen
+import fr.isen.rey.thegreatestcocktailapp.screens.FavoriteScreen
 import fr.isen.rey.thegreatestcocktailapp.ui.theme.TheGreatestCocktailAppTheme
 import kotlinx.coroutines.launch
 
@@ -93,7 +95,7 @@ class MainActivity : ComponentActivity() {
                                 when (navigationItem) {
                                     NavigationItem.Home -> DetailCocktailScreen(Modifier.padding(innerPadding))
                                     NavigationItem.List -> CategoriesScreen(Modifier.padding(innerPadding))
-                                    NavigationItem.Fav -> {}
+                                    NavigationItem.Fav -> FavoriteScreen(Modifier.padding(innerPadding))
                                 }
                             }
                         }
@@ -106,7 +108,7 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopAppBar(snackbarHostState: SnackbarHostState) {
+fun TopAppBar(snackbarHostState: SnackbarHostState, drinkID: String? = null) {
     CenterAlignedTopAppBar(
         title = {
             Text("Random")
@@ -114,10 +116,14 @@ fun TopAppBar(snackbarHostState: SnackbarHostState) {
         actions = {
             val added = stringResource(R.string.snackbar_added)
             val removed = stringResource(R.string.snackbar_removed)
-//            val context = LocalContext.current
 
             val snackbarScope = rememberCoroutineScope()
-            val isFav = remember { mutableStateOf(false) }
+
+            val context = LocalContext.current
+            val sharedPreferences = SharedPreferencesHelper(context)
+            val drinkList = sharedPreferences.getFavoriteList()
+            val isFav = remember { mutableStateOf(getFavoriteStatusForID(drinkID, drinkList)) }
+
             IconToggleButton(
                 isFav.value,
                 onCheckedChange = {
@@ -131,6 +137,14 @@ fun TopAppBar(snackbarHostState: SnackbarHostState) {
                     snackbarScope.launch {
                         snackbarHostState.showSnackbar(if (isFav.value) added else removed)
                     }
+
+                    if (drinkID != null) {
+                        updateFavoriteList(
+                            drinkID.toString(),
+                            isFav.value,
+                            sharedPreferences,
+                            drinkList)
+                    }
                 }
             ) {
                 Icon(
@@ -140,4 +154,25 @@ fun TopAppBar(snackbarHostState: SnackbarHostState) {
             }
         }
     )
+}
+
+fun getFavoriteStatusForID(drinkID: String?, list: ArrayList<String>): Boolean {
+    for (id in list) {
+        if (drinkID == id) {
+            return true
+        }
+    }
+    return false
+}
+
+fun updateFavoriteList(drinkID: String,
+                       shouldBeAdded: Boolean,
+                       sharedPreferencesHelper: SharedPreferencesHelper,
+                       list: ArrayList<String>) {
+    if (shouldBeAdded) {
+        list.add(drinkID)
+    } else {
+        list.remove(drinkID)
+    }
+    sharedPreferencesHelper.saveFavoriteList(list)
 }

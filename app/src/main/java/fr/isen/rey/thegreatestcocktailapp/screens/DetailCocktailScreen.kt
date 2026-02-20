@@ -42,7 +42,7 @@ import retrofit2.Response
 data class Ingredient(val ingredient: String, val measure: String)
 
 @Composable
-fun DetailCocktailScreen(modifier: Modifier) {
+fun DetailCocktailScreen(modifier: Modifier, drinkID: String? = null) {
     val ingredients = listOf(
         Ingredient("vodka", "4cl"),
         Ingredient("curacao", "3cl"),
